@@ -1,0 +1,22 @@
+# Argo CD Application for GitOps delivery of SRE Copilot.
+# NOTE: replace repoURL with your fork before applying.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sre-copilot
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Parker2127/sre-copilot.git
+    targetRevision: HEAD
+    path: helm/sre-copilot
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
