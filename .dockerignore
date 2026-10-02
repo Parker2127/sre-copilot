@@ -1,0 +1,11 @@
+.git
+__pycache__
+*.pyc
+.venv
+tests
+demo
+terraform
+gitops
+prometheus
+.github
+*.md

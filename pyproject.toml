@@ -1,0 +1,13 @@
+[project]
+name = "sre-copilot"
+version = "0.1.0"
+description = "AI-assisted on-call companion for Kubernetes"
+requires-python = ">=3.12"
+
+[tool.ruff.lint]
+# BLE001 (blind `except Exception`) is a deliberate design choice in this
+# codebase: the enrichment, LLM, and notification paths must never raise
+# during an incident. Every external call is defensive by design — failures
+# are recorded in the response (context["errors"], llm_error) instead of
+# becoming a 500 while someone is being paged.
+ignore = ["BLE001"]
