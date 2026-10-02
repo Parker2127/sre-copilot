@@ -7,7 +7,9 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  # Must stay lowercase: docker/ghcr reject uppercase repository names,
+  # and github.repository preserves the account's capitalisation.
+  IMAGE_NAME: parker2127/sre-copilot
 
 jobs:
   lint-test:
