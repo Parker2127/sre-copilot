@@ -1,13 +1,51 @@
-# SRE Copilot
+# SRE Copilot 🤖🚨
 
-An AI-assisted on-call companion for Kubernetes. It receives Prometheus/Alertmanager
-webhooks, enriches every alert with live cluster context (pods, events, logs,
-workload status), asks an LLM for a diagnosis and remediation plan, and posts the
-result to Slack — in seconds, while you're still opening your laptop.
+**An AI on-call assistant for Kubernetes.** When something breaks at 2 AM, it
+figures out what happened and tells your team in Slack — in seconds, with the
+evidence attached.
 
-Built as a portfolio project by [Shrikar Kaduluri](https://github.com/Parker2127).
+## Why this exists
 
-## How it works
+When a production system has a problem, the on-call engineer gets paged and then
+spends precious minutes doing detective work: *which service? which pod? what
+changed? what do the logs say?* Every minute of that is downtime.
+
+SRE Copilot does the detective work automatically. It hears the alert, gathers
+the clues from Kubernetes, forms a diagnosis, and posts the whole story to Slack
+— so the human starts from "here's what's wrong" instead of a blank screen.
+
+```mermaid
+flowchart LR
+    A["🚨 Alert fires\n(Prometheus)"] --> B["🤖 SRE Copilot\nhears it"]
+    B --> C["🔍 Gathers clues\n(pods, logs, events,\nrecent deploys)"]
+    C --> D["🧠 Diagnosis\n(AI, or built-in\nengine as backup)"]
+    D --> E["💬 Posts to Slack\nwhat broke +\nwhy + evidence"]
+```
+
+## What it does, step by step
+
+1. **Listens** — Prometheus/Alertmanager sends it a webhook the moment an alert fires.
+2. **Investigates** — it queries the live Kubernetes cluster: are pods crashing?
+   Restarting? Any recent deployments? What do the logs say?
+3. **Diagnoses** — an AI model writes up a likely cause and fix. No AI key? A
+   built-in heuristic engine does the job instead, so it *never* depends on an
+   external service during an incident.
+4. **Reports** — the full picture lands in Slack: what broke, why it thinks so,
+   and the evidence.
+
+## Proven, not promised
+
+Measured against a live Kubernetes cluster:
+
+- ✅ **15/15** test alerts triaged — zero missed, zero failed
+- ⚡ **~28ms** median triage time (heuristic path)
+- 🔁 Fully reproducible: ships as a Helm chart, Terraform for AKS, Argo CD for
+  GitOps delivery, CI on GitHub Actions
+
+<details>
+<summary><b>🛠️ For engineers — architecture & quickstart</b></summary>
+
+### How it works (technical)
 
 ```
 Prometheus ──▶ Alertmanager ──▶ SRE Copilot ──▶ Slack
@@ -20,11 +58,10 @@ Prometheus ──▶ Alertmanager ──▶ SRE Copilot ──▶ Slack
                                 └─ 4. Notify: structured Slack message + JSON log
 ```
 
-No LLM API key? No problem. The service ships with a deterministic heuristic engine,
-so the full pipeline — webhook → enrichment → diagnosis → Slack — works out of the
-box. Set `LLM_API_KEY` and it upgrades to LLM-generated diagnoses automatically.
+Set `LLM_API_KEY` and it upgrades to LLM-generated diagnoses automatically.
+Without it, the deterministic heuristic engine runs the full pipeline.
 
-## Quickstart (local demo, no cluster needed)
+### Quickstart (local demo, no cluster needed)
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
@@ -40,7 +77,7 @@ python demo/send-test-alert.py
 See [DEMO.md](DEMO.md) for the full Kubernetes demo on `kind`, including a live
 CrashLoopBackOff scenario.
 
-## Configuration
+### Configuration
 
 | Variable | Default | Description |
 |---|---|---|
@@ -54,7 +91,7 @@ CrashLoopBackOff scenario.
 | `SLACK_WEBHOOK_URL` | _(empty = log only)_ | Incoming Slack webhook for notifications |
 | `LOG_LEVEL` | `INFO` | Python log level |
 
-## Repository layout
+### Repository layout
 
 ```
 app/                  FastAPI service (receiver, enricher, LLM, notifier)
@@ -66,7 +103,7 @@ gitops/               Argo CD Application manifest
 demo/                 Sample Alertmanager payload + sender script
 ```
 
-## Design notes
+### Design notes
 
 - **Enrichment never fails the request.** Every Kubernetes lookup is defensive; partial
   context with a recorded error beats a 500 during an incident.
@@ -76,8 +113,13 @@ demo/                 Sample Alertmanager payload + sender script
 - LLM output is requested as strict JSON and validated before use; any LLM failure
   falls back to heuristics so paging never depends on an API.
 
-## Roadmap
+### Roadmap
 
 - Vector-store lookup of past incidents for "have we seen this before?" context
 - Auto-generated runbook PRs from repeated diagnoses
 - MS Teams / PagerDuty notifiers next to Slack
+
+</details>
+
+---
+Built by [Shrikar Kaduluri](https://github.com/Parker2127) — DevOps Engineer.
