@@ -1,0 +1,9 @@
+apiVersion: v2
+name: sre-copilot
+description: AI-assisted on-call companion — turns Prometheus alerts into diagnosed, actionable Slack messages
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/Parker2127/sre-copilot
+maintainers:
+  - name: Shrikar Kaduluri

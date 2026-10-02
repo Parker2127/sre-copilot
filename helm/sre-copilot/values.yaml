@@ -1,0 +1,58 @@
+# Default values for sre-copilot.
+replicaCount: 2
+
+image:
+  # NOTE: replace with your registry before deploying
+  repository: ghcr.io/parker2127/sre-copilot
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  port: 8080
+
+# Plain (non-secret) configuration, mounted via ConfigMap.
+env:
+  logLevel: "INFO"
+  k8sDefaultNamespace: "default"
+  k8sLogTailLines: "50"
+  llmBaseUrl: "https://api.openai.com/v1"
+  llmModel: "gpt-4o-mini"
+
+# Secrets, mounted via Secret. Leave empty to disable the feature:
+#   apiKey          -> webhook auth (empty = open, demo mode)
+#   llmApiKey       -> LLM diagnosis (empty = heuristic mode)
+#   slackWebhookUrl -> Slack notifications (empty = log only)
+secrets:
+  create: true
+  apiKey: ""
+  llmApiKey: ""
+  slackWebhookUrl: ""
+
+serviceAccount:
+  create: true
+  # name: ""  # defaults to the chart fullname
+
+rbac:
+  # Read-only access to pods, logs, events and workloads for enrichment.
+  create: true
+
+resources: {}
+  # limits:
+  #   cpu: 500m
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+ingress:
+  enabled: false
+  # className: nginx
+  # hosts:
+  #   - host: sre-copilot.example.com
+  #     paths: [{ path: /, pathType: Prefix }]
