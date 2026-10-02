@@ -1,0 +1,10 @@
+SRE Copilot is deployed and (hopefully) staying out of trouble.
+
+Webhook endpoint (in-cluster):
+  http://{{ include "sre-copilot.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/alerts
+
+Point Alertmanager at it — see prometheus/alertmanager.yaml in the repo.
+
+Try it locally:
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "sre-copilot.fullname" . }} {{ .Values.service.port }}:8080
+  python demo/send-test-alert.py

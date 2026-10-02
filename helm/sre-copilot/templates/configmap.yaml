@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "sre-copilot.fullname" . }}
+  labels:
+    {{- include "sre-copilot.labels" . | nindent 4 }}
+data:
+  PORT: "8080"
+  LOG_LEVEL: {{ .Values.env.logLevel | quote }}
+  K8S_DEFAULT_NAMESPACE: {{ .Values.env.k8sDefaultNamespace | quote }}
+  K8S_LOG_TAIL_LINES: {{ .Values.env.k8sLogTailLines | quote }}
+  LLM_BASE_URL: {{ .Values.env.llmBaseUrl | quote }}
+  LLM_MODEL: {{ .Values.env.llmModel | quote }}
