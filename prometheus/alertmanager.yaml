@@ -1,0 +1,28 @@
+# Alertmanager routing: send firing (and resolved) alerts to SRE Copilot.
+# If you use kube-prometheus-stack, paste the `receivers` entry into
+# alertmanager.config.receivers and set the route receiver accordingly.
+#
+# NOTE: the URL below assumes the chart was installed as release "sre-copilot"
+# in namespace "monitoring". Adjust to your release name/namespace:
+#   http://<release>-sre-copilot.<namespace>.svc.cluster.local:8080/alerts
+
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ["alertname", "namespace"]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 3h
+  receiver: "sre-copilot"
+
+receivers:
+  - name: "sre-copilot"
+    webhook_configs:
+      - url: "http://sre-copilot.monitoring.svc.cluster.local:8080/alerts"
+        send_resolved: true
+        # If you set secrets.apiKey in the chart, protect the webhook with a
+        # bearer token instead of leaving it open:
+        # http_config:
+        #   authorization:
+        #     credentials: "<same value as secrets.apiKey>"
